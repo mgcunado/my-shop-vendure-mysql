@@ -89,6 +89,26 @@ database may be orchestrated with Docker Compose.
 In Vendure, your custom functionality will live in [plugins](https://www.vendure.io/docs/plugins/).
 These should be located in the `./src/plugins` directory.
 
+### ElasticSearch
+
+- Put ElasticSearchPlugin config in `src/vendure-config.ts` file on:
+```
+export const config: VendureConfig = {
+    ...
+  plugins: [
+    // DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
+    ElasticsearchPlugin.init({
+```
+
+- Disable `DefaultSearchPlugin`.
+
+- rebuild and restart the server:
+```
+yarn build && yarn start
+```
+
+- Rebuild search index in `http://localhost:3000/admin/catalog/products` on right side of `+ New product` button click on `Rebuild search index`
+
 ## Migrations
 
 [Migrations](https://www.vendure.io/docs/developer-guide/migrations/) allow safe updates to the database schema. Migrations
