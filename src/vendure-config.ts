@@ -1,7 +1,7 @@
 import {
   dummyPaymentHandler,
   DefaultJobQueuePlugin,
-  DefaultSearchPlugin,
+  // DefaultSearchPlugin,
   VendureConfig,
 } from '@vendure/core';
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
@@ -12,6 +12,7 @@ import { compileUiExtensions, setBranding } from '@vendure/ui-devkit/compiler';
 import 'dotenv/config';
 import path from 'path';
 import { ProvincePlugin } from './plugins/province/province.plugin';
+import { ElasticSearchInput, ElasticsearchPlugin } from '@vendure/elasticsearch-plugin';
 
 const IS_DEV = process.env.APP_ENV === 'dev';
 
@@ -74,7 +75,49 @@ export const config: VendureConfig = {
       assetUrlPrefix: IS_DEV ? undefined : 'https://www.my-shop.com/assets',
     }),
     DefaultJobQueuePlugin.init({ useDatabaseForBuffer: true }),
-    DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
+    // DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
+    ElasticsearchPlugin.init({
+      host: 'http://localhost',
+      port: 9200,
+      searchConfig: {
+        mapQuery: (query: any, input: ElasticSearchInput, searchConfig: any) => {
+          query.bool.must = [
+            {
+              query_string: {
+                query: "*" + input.term + "*",
+                fields: [
+                  `productName^${searchConfig.boostFields.productName}`,
+                  `description^${searchConfig.boostFields.description}`,
+                ],
+              }
+            }
+          ];
+
+          return query;
+        }        
+      },
+      // we use asciifolding filter to not discriminate by accents
+      indexSettings: {
+        analysis: {
+          analyzer: {
+            custom_analyzer: {
+              tokenizer: 'standard',
+              filter: ['lowercase', 'asciifolding']
+            }
+          }
+        }
+      },
+      indexMappingProperties: {
+        productName: {
+          type: 'text',
+          analyzer: 'custom_analyzer',
+        },
+        description: {
+          type: 'text',
+          analyzer: 'custom_analyzer',
+        },
+      }
+    }),
     EmailPlugin.init({
       devMode: true,
       outputPath: path.join(__dirname, '../static/email/test-emails'),
