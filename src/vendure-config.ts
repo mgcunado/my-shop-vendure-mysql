@@ -3,6 +3,7 @@ import {
   DefaultJobQueuePlugin,
   // DefaultSearchPlugin,
   VendureConfig,
+  EntityHydrator,
 } from '@vendure/core';
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
 import { AssetServerPlugin } from '@vendure/asset-server-plugin';
@@ -13,6 +14,7 @@ import 'dotenv/config';
 import path from 'path';
 import { ProvincePlugin } from './plugins/province/province.plugin';
 import { ElasticSearchInput, ElasticsearchPlugin } from '@vendure/elasticsearch-plugin';
+import { StripePlugin } from '@vendure/payments-plugin/package/stripe';
 
 const IS_DEV = process.env.APP_ENV === 'dev';
 
@@ -65,6 +67,10 @@ export const config: VendureConfig = {
   // need to be updated. See the "Migrations" section in README.md.
   customFields: {},
   plugins: [
+    StripePlugin.init({
+      // This prevents different customers from using the same PaymentIntent
+      storeCustomersInStripe: true,
+    }),
     ProvincePlugin.init(),
     AssetServerPlugin.init({
       route: 'assets',
