@@ -70,6 +70,24 @@ export const config: VendureConfig = {
     StripePlugin.init({
       // This prevents different customers from using the same PaymentIntent
       storeCustomersInStripe: true,
+      paymentIntentCreateParams: (injector, ctx, order) => {
+        let metadata = {};
+        if (order.customer?.firstName) {
+          metadata = {
+            name: order.customer.firstName,
+          };
+        }
+
+        return {
+          payment_method: 'pm_card_visa', 
+          metadata,
+        };
+      },
+      customerCreateParams: (injector, ctx, order) => {
+        return {
+          name: order.customer?.firstName,
+        }
+      },
     }),
     ProvincePlugin.init(),
     AssetServerPlugin.init({
@@ -100,7 +118,7 @@ export const config: VendureConfig = {
           ];
 
           return query;
-        }        
+        }
       },
       // we use asciifolding filter to not discriminate by accents
       indexSettings: {
@@ -154,9 +172,9 @@ export const config: VendureConfig = {
             ]
           },
           setBranding({
-            // The small logo appears in the top left of the screen  
+            // The small logo appears in the top left of the screen
             smallLogoPath: path.join(__dirname, 'images/my-logo-sm-transparent.png'),
-            // The large logo is used on the login page  
+            // The large logo is used on the login page
             largeLogoPath: path.join(__dirname, 'images/my-logo-lg-transparent.png'),
             faviconPath: path.join(__dirname, 'images/my-favicon.ico'),
           }),
