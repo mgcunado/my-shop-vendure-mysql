@@ -109,6 +109,56 @@ yarn build && yarn start
 
 - Rebuild search index in `http://localhost:3000/admin/catalog/products` on right side of `+ New product` button click on `Rebuild search index`
 
+### StripePlugin
+
+- Put StripePlugin config in `src/vendure-config.ts` file on:
+```
+export const config: VendureConfig = {
+    ...
+  plugins: [
+    StripePlugin.init({
+      storeCustomersInStripe: true,
+    }),
+```
+
+- Disable `DefaultSearchPlugin`.
+- Follow related instructions for [StripePlugin on official doc](https://docs.vendure.io/reference/core-plugins/payments-plugin/stripe-plugin/)
+
+- the webhook endpoint we must add on stripe account is:
+  ```
+  http://localhost:3000/payments/stripe
+  ```
+
+- on local environment, we add this endpoint by using Stripe Cli:
+  ```
+  stripe local
+  ```
+-- put created secret key on:
+```
+admin-ui => settings => payments methods => stripe => Webhook secret
+```
+-- in API Key we must put our stripe's account our publishable test key:
+```
+pk_test_...
+```
+
+- then run up the endpoint:
+  ```
+  stripe listen --forward-to localhost:3000/payments/stripe
+  ``` 
+- in other terminal window trigger next event:
+```
+stripe trigger payment_intent.succeeded
+stripe trigger payment_intent.payment_failed
+```
+
+- rebuild and restart the server:
+```
+yarn build && yarn start
+```
+
+- Rebuild search index in `http://localhost:3000/admin/catalog/products` on right side of `+ New product` button click on `Rebuild search index`
+
 ## Migrations
 
 [Migrations](https://www.vendure.io/docs/developer-guide/migrations/) allow safe updates to the database schema. Migrations

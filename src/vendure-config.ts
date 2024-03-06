@@ -70,24 +70,19 @@ export const config: VendureConfig = {
     StripePlugin.init({
       // This prevents different customers from using the same PaymentIntent
       storeCustomersInStripe: true,
-      paymentIntentCreateParams: (injector, ctx, order) => {
-        let metadata = {};
-        if (order.customer?.firstName) {
-          metadata = {
-            name: order.customer.firstName,
-          };
-        }
-
-        return {
-          payment_method: 'pm_card_visa', 
-          metadata,
-        };
-      },
-      customerCreateParams: (injector, ctx, order) => {
-        return {
-          name: order.customer?.firstName,
-        }
-      },
+      // paymentIntentCreateParams: (injector, ctx, order) => {
+      //   let metadata = {};
+      //   if (order.customer?.firstName) {
+      //     metadata = {
+      //       name: order.customer.firstName,
+      //     };
+      //   }
+      //
+      //   return {
+      //     payment_method: 'pm_card_visa', 
+      //     metadata,
+      //   };
+      // },
     }),
     ProvincePlugin.init(),
     AssetServerPlugin.init({
